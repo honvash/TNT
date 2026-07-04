@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>PARTO·ORA — dove posso andare dopo le 18:30?</title>
+<meta name="description" content="Scegli aeroporto, giorno e fascia oraria di partenza. Vedi dove puoi volare: gli orari reali dal tabellone, il prezzo indicativo accanto." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --ink: #0b1f3a; --ink-2: #14294a; --paper: #faf8f3;
+    --amber: #e8a33d; --amber-deep: #b8791f; --sky: #2e6bb0;
+    --rust: #b8502f; --grey: #6b7280; --line: #e4dfd4; --line-dark: #24385c;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body { margin: 0; font-family: "Inter", system-ui, sans-serif; color: var(--ink); background: var(--paper); line-height: 1.5; }
+  .wrap { max-width: 960px; margin: 0 auto; padding: 0 20px; }
+
+  header { padding: 26px 0 8px; }
+  .brand { font-family: "Space Grotesk", sans-serif; font-weight: 700; font-size: 20px; letter-spacing: .06em; display: flex; align-items: center; gap: 10px; }
+  .brand .dot { width: 9px; height: 9px; background: var(--amber); border-radius: 50%; box-shadow: 0 0 0 3px rgba(232,163,61,.2); }
+  .tagline { color: var(--grey); font-size: 14px; margin-top: 4px; }
+
+  .panel { margin-top: 20px; border: 1px solid var(--line); background: #fff; border-radius: 14px; padding: 22px;
+           box-shadow: 0 1px 0 rgba(11,31,58,.03), 0 20px 40px -30px rgba(11,31,58,.25); }
+  .field { margin-bottom: 16px; position: relative; }
+  .field label { display: block; font-size: 12px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--grey); margin-bottom: 7px; }
+  input[type="text"], input[type="date"], input[type="time"] {
+    width: 100%; padding: 13px 14px; font-size: 16px; font-family: inherit;
+    border: 1px solid var(--line); border-radius: 10px; background: var(--paper); color: var(--ink);
+  }
+  input:focus { outline: 2px solid var(--sky); outline-offset: 1px; background: #fff; }
+
+  .autobox { position: absolute; top: 100%; left: 0; right: 0; z-index: 20; background: #fff; border: 1px solid var(--line);
+             border-radius: 10px; margin-top: 4px; max-height: 240px; overflow-y: auto; box-shadow: 0 18px 40px -20px rgba(11,31,58,.35); }
+  .autobox div { padding: 11px 14px; cursor: pointer; font-size: 15px; display: flex; gap: 10px; align-items: baseline; }
+  .autobox div:hover { background: var(--paper); }
+  .autobox .iata { font-family: "JetBrains Mono", monospace; font-weight: 700; color: var(--sky); }
+  .autobox .muted { color: var(--grey); font-size: 13px; }
+
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip { font-family: inherit; font-size: 14px; padding: 9px 14px; cursor: pointer; border: 1px solid var(--line);
+          background: var(--paper); border-radius: 999px; color: var(--ink); transition: background .12s, border-color .12s; }
+  .chip[aria-pressed="true"] { background: var(--ink); color: #fff; border-color: var(--ink); }
+  .chip:focus-visible { outline: 2px solid var(--sky); outline-offset: 2px; }
+
+  .row2 { display: grid; grid-template-columns: 1fr; gap: 16px; }
+  @media (min-width: 640px) { .row2 { grid-template-columns: 1fr 1fr; } }
+
+  .exact { display: flex; align-items: center; gap: 10px; margin-top: 10px; font-size: 14px; color: var(--grey); }
+  .exact input[type="time"] { width: auto; padding: 9px 12px; }
+
+  .cta { width: 100%; margin-top: 8px; padding: 15px; font-size: 16px; font-weight: 600; font-family: "Space Grotesk", sans-serif;
+         letter-spacing: .02em; background: var(--amber); color: #2a1c00; border: none; border-radius: 10px; cursor: pointer; transition: transform .06s, background .12s; }
+  .cta:hover { background: #f2ae47; } .cta:active { transform: translateY(1px); } .cta:disabled { opacity: .6; cursor: default; }
+
+  .results-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin: 30px 0 12px; flex-wrap: wrap; }
+  .results-head h2 { font-family: "Space Grotesk", sans-serif; font-size: 18px; margin: 0; }
+  .sort { display: flex; gap: 6px; align-items: center; font-size: 13px; color: var(--grey); }
+  .sort button { font-family: "JetBrains Mono", monospace; font-size: 12px; background: none; border: 1px solid var(--line); padding: 6px 9px; border-radius: 7px; cursor: pointer; color: var(--ink); }
+  .sort button[aria-pressed="true"] { border-color: var(--ink); background: var(--ink); color: #fff; }
+
+  .board { border-radius: 14px; overflow: hidden; border: 1px solid var(--line-dark); }
+  .board-row { background: var(--ink); color: #eaf1fb; border-bottom: 1px solid var(--line-dark); padding: 16px 18px;
+               display: grid; gap: 4px 18px; grid-template-columns: auto 1fr auto; align-items: center; }
+  .board-row:last-child { border-bottom: none; }
+  .b-time { font-family: "JetBrains Mono", monospace; font-weight: 700; font-size: 26px; color: var(--amber); letter-spacing: .02em; }
+  .b-mid .b-route { font-family: "Space Grotesk", sans-serif; font-weight: 700; font-size: 16px; }
+  .b-mid .b-route .arrow { color: var(--amber); margin: 0 6px; }
+  .b-mid .b-sub { font-family: "JetBrains Mono", monospace; font-size: 12px; color: #9db4d6; margin-top: 3px; display: flex; gap: 4px 12px; flex-wrap: wrap; }
+  .b-right { text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 7px; }
+  .b-price { font-family: "JetBrains Mono", monospace; font-weight: 700; font-size: 19px; color: #fff; }
+  .b-price .na { font-size: 12px; color: #9db4d6; font-weight: 500; }
+  .verdict { font-family: "JetBrains Mono", monospace; font-weight: 700; font-size: 10.5px; letter-spacing: .12em; padding: 3px 8px; border-radius: 5px; text-transform: uppercase; white-space: nowrap; }
+  .verdict.affare { background: var(--amber); color: #2a1c00; }
+  .verdict.media { background: transparent; color: #cdd9ec; border: 1px solid #3a5580; }
+  .verdict.caro { background: #3a1d14; color: #f0a488; border: 1px solid #6b3521; }
+  .buy { display: inline-block; font-family: inherit; font-size: 13px; font-weight: 600; background: #fff; color: var(--ink); text-decoration: none; padding: 8px 13px; border-radius: 8px; }
+  .buy:hover { background: var(--paper); }
+
+  @media (max-width: 560px) {
+    .board-row { grid-template-columns: auto 1fr; grid-template-areas: "time mid" "right right"; }
+    .b-time { grid-area: time; } .b-mid { grid-area: mid; } .b-right { grid-area: right; align-items: flex-start; text-align: left; margin-top: 8px; }
+  }
+
+  .state { text-align: center; padding: 46px 20px; color: var(--grey); }
+  .state .big { font-family: "Space Grotesk", sans-serif; color: var(--ink); font-size: 17px; margin-bottom: 6px; }
+  .spinner { width: 26px; height: 26px; border: 3px solid var(--line); border-top-color: var(--amber); border-radius: 50%; margin: 0 auto 14px; animation: spin .8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .errbox { border: 1px solid var(--rust); background: #fbeee9; color: #7a2f16; padding: 14px 16px; border-radius: 10px; font-size: 14px; }
+  .fade { animation: rise .35s ease both; }
+  @keyframes rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  @media (prefers-reduced-motion: reduce) { .fade, .spinner { animation: none; } }
+
+  footer { margin: 40px 0 60px; color: var(--grey); font-size: 12.5px; line-height: 1.6; }
+  footer a { color: var(--sky); }
+  .legend { display: flex; gap: 14px; flex-wrap: wrap; margin: 8px 0 16px; font-size: 12px; }
+  .legend span { display: inline-flex; align-items: center; gap: 6px; }
+  .swatch { width: 11px; height: 11px; border-radius: 3px; display: inline-block; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="brand"><span class="dot"></span> PARTO·ORA</div>
+    <div class="tagline">Scegli quando puoi partire. Ti diciamo dove puoi andare.</div>
+  </header>
+
+  <div class="panel">
+    <div class="field">
+      <label for="origin">Da dove parti</label>
+      <input type="text" id="origin" autocomplete="off" placeholder="Es. Roma, Milano, FCO…" />
+      <div class="autobox" id="origin-list" style="display:none"></div>
+    </div>
+
+    <div class="row2">
+      <div class="field">
+        <label for="date">Giorno</label>
+        <input type="date" id="date" />
+        <div class="chips" style="margin-top:10px">
+          <button class="chip" data-day="0" type="button" aria-pressed="false">Oggi</button>
+          <button class="chip" data-day="1" type="button" aria-pressed="false">Domani</button>
+        </div>
+      </div>
+      <div class="field">
+        <label>A partire da</label>
+        <div class="chips" id="slot">
+          <button class="chip" data-from="05:00" data-to="12:00" type="button" aria-pressed="false">Mattina</button>
+          <button class="chip" data-from="12:00" data-to="18:00" type="button" aria-pressed="false">Pomeriggio</button>
+          <button class="chip" data-from="18:00" data-to="23:59" type="button" aria-pressed="true">Sera</button>
+          <button class="chip" data-from="00:00" data-to="23:59" type="button" aria-pressed="false">Tutto il giorno</button>
+        </div>
+        <div class="exact">
+          <span>oppure dopo le</span>
+          <input type="time" id="exact" />
+        </div>
+      </div>
+    </div>
+
+    <button class="cta" id="go" type="button">Dove posso andare?</button>
+  </div>
+
+  <div class="results-head" id="rhead" style="display:none">
+    <h2 id="rcount"></h2>
+    <div class="sort" id="sort">
+      Ordina:
+      <button data-sort="time" type="button" aria-pressed="true">Orario</button>
+      <button data-sort="price" type="button" aria-pressed="false">Prezzo</button>
+      <button data-sort="value" type="button" aria-pressed="false">Convenienza</button>
+    </div>
+  </div>
+
+  <div id="results"></div>
+
+  <footer>
+    <div class="legend" id="legend" style="display:none">
+      <span><i class="swatch" style="background:var(--amber)"></i> Affare</span>
+      <span><i class="swatch" style="background:#3a5580"></i> Nella media</span>
+      <span><i class="swatch" style="background:#6b3521"></i> Caro</span>
+    </div>
+    Orari reali dal tabellone partenze dell'aeroporto (voli diretti in partenza nella finestra scelta).
+    Il prezzo accanto è la tariffa indicativa per quella destinazione in quel giorno, non del singolo volo: si verifica al clic.
+    Alcuni link contengono un codice affiliato.
+  </footer>
+
+</div>
+
+<script>
+// ---------- Aeroporti di partenza (aggiungine quanti vuoi) ----------
+const AIRPORTS = [
+  {iata:"FCO", city:"Roma Fiumicino", country:"Italia"},
+  {iata:"CIA", city:"Roma Ciampino", country:"Italia"},
+  {iata:"MXP", city:"Milano Malpensa", country:"Italia"},
+  {iata:"LIN", city:"Milano Linate", country:"Italia"},
+  {iata:"BGY", city:"Bergamo Orio al Serio", country:"Italia"},
+  {iata:"VCE", city:"Venezia", country:"Italia"},
+  {iata:"TSF", city:"Treviso", country:"Italia"},
+  {iata:"BLQ", city:"Bologna", country:"Italia"},
+  {iata:"NAP", city:"Napoli", country:"Italia"},
+  {iata:"CTA", city:"Catania", country:"Italia"},
+  {iata:"PMO", city:"Palermo", country:"Italia"},
+  {iata:"CAG", city:"Cagliari", country:"Italia"},
+  {iata:"BRI", city:"Bari", country:"Italia"},
+  {iata:"TRN", city:"Torino", country:"Italia"},
+  {iata:"PSA", city:"Pisa", country:"Italia"},
+  {iata:"FLR", city:"Firenze", country:"Italia"},
+  {iata:"VRN", city:"Verona", country:"Italia"},
+  {iata:"OLB", city:"Olbia", country:"Italia"},
+  {iata:"AHO", city:"Alghero", country:"Italia"},
+  {iata:"BDS", city:"Brindisi", country:"Italia"},
+  {iata:"CDG", city:"Parigi Charles de Gaulle", country:"Francia"},
+  {iata:"NCE", city:"Nizza", country:"Francia"},
+  {iata:"BCN", city:"Barcellona", country:"Spagna"},
+  {iata:"MAD", city:"Madrid", country:"Spagna"},
+  {iata:"LHR", city:"Londra Heathrow", country:"Regno Unito"},
+  {iata:"AMS", city:"Amsterdam", country:"Paesi Bassi"},
+  {iata:"FRA", city:"Francoforte", country:"Germania"},
+  {iata:"MUC", city:"Monaco di Baviera", country:"Germania"},
+  {iata:"VIE", city:"Vienna", country:"Austria"},
+  {iata:"ZRH", city:"Zurigo", country:"Svizzera"},
+  {iata:"ATH", city:"Atene", country:"Grecia"}
+].filter(a => a.iata.length === 3);
+
+const state = { origin:"", date:"", from:"18:00", to:"23:59", sort:"time", rows:[] };
+
+// data di default = oggi
+const dateInput = document.getElementById("date");
+(function initDate(){
+  const d = new Date();
+  dateInput.value = d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0");
+  state.date = dateInput.value;
+})();
+dateInput.addEventListener("change", () => state.date = dateInput.value);
+
+// ---------- Autocomplete origine ----------
+(function setupAuto(){
+  const input = document.getElementById("origin");
+  const list = document.getElementById("origin-list");
+  input.addEventListener("input", () => {
+    state.origin = "";
+    const q = input.value.trim().toLowerCase();
+    if (!q) { list.style.display = "none"; return; }
+    const matches = AIRPORTS.filter(a =>
+      a.iata.toLowerCase().startsWith(q) || a.city.toLowerCase().includes(q) || a.country.toLowerCase().includes(q)
+    ).slice(0, 8);
+    if (!matches.length) { list.style.display = "none"; return; }
+    list.innerHTML = matches.map(a =>
+      `<div data-iata="${a.iata}" data-label="${a.city}"><span class="iata">${a.iata}</span> ${a.city} <span class="muted">${a.country}</span></div>`
+    ).join("");
+    list.style.display = "block";
+    list.querySelectorAll("div").forEach(el => el.addEventListener("mousedown", () => {
+      input.value = el.dataset.label + " (" + el.dataset.iata + ")";
+      state.origin = el.dataset.iata;
+      list.style.display = "none";
+    }));
+  });
+  input.addEventListener("blur", () => setTimeout(() => list.style.display = "none", 150));
+})();
+
+// ---------- Chip: giorno ----------
+document.querySelectorAll("[data-day]").forEach(btn => btn.addEventListener("click", () => {
+  const d = new Date(); d.setDate(d.getDate() + Number(btn.dataset.day));
+  dateInput.value = d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0");
+  state.date = dateInput.value;
+  document.querySelectorAll("[data-day]").forEach(b => b.setAttribute("aria-pressed","false"));
+  btn.setAttribute("aria-pressed","true");
+}));
+
+// ---------- Chip: fascia oraria ----------
+const slot = document.getElementById("slot");
+slot.addEventListener("click", e => {
+  const btn = e.target.closest("button"); if (!btn) return;
+  slot.querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed","false"));
+  btn.setAttribute("aria-pressed","true");
+  state.from = btn.dataset.from; state.to = btn.dataset.to;
+  document.getElementById("exact").value = "";
+});
+// Orario esatto → sovrascrive la fascia
+document.getElementById("exact").addEventListener("change", e => {
+  const v = e.target.value;
+  if (v) {
+    state.from = v; state.to = "23:59";
+    slot.querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed","false"));
+  }
+});
+
+// ---------- Ordinamento ----------
+document.getElementById("sort").addEventListener("click", e => {
+  const btn = e.target.closest("button"); if (!btn) return;
+  document.querySelectorAll("#sort button").forEach(b => b.setAttribute("aria-pressed","false"));
+  btn.setAttribute("aria-pressed","true");
+  state.sort = btn.dataset.sort;
+  if (state.rows.length) renderResults();
+});
+
+// ---------- Ricerca ----------
+async function search() {
+  if (!state.origin) { showError("Scegli prima l'aeroporto di partenza dalla lista."); return; }
+  const go = document.getElementById("go");
+  go.disabled = true; go.textContent = "Cerco…"; showLoading();
+  try {
+    const p = new URLSearchParams({ origin: state.origin, date: state.date, from: state.from, to: state.to, currency: "eur" });
+    const res = await fetch("/api/search?" + p.toString());
+    const j = await res.json();
+    if (j.error) throw new Error(j.error);
+    state.rows = j.data || [];
+    renderResults();
+  } catch (err) {
+    showError(err.message || "Qualcosa è andato storto.");
+  } finally {
+    go.disabled = false; go.textContent = "Dove posso andare?";
+  }
+}
+document.getElementById("go").addEventListener("click", search);
+
+// ---------- Scoring ----------
+function median(nums) {
+  if (!nums.length) return 0;
+  const s = [...nums].sort((a,b)=>a-b); const m = Math.floor(s.length/2);
+  return s.length % 2 ? s[m] : (s[m-1]+s[m])/2;
+}
+function verdictFor(price, med) {
+  if (!med || price == null) return null;
+  const r = price / med;
+  if (r <= 0.8) return { cls:"affare", label:"Affare" };
+  if (r <= 1.15) return { cls:"media", label:"Nella media" };
+  return { cls:"caro", label:"Caro" };
+}
+function originLabel(iata){ const a = AIRPORTS.find(x=>x.iata===iata); return a ? a.city : iata; }
+
+// ---------- Render ----------
+function renderResults() {
+  const box = document.getElementById("results");
+  const head = document.getElementById("rhead");
+  const legend = document.getElementById("legend");
+
+  if (!state.rows.length) {
+    head.style.display = "none"; legend.style.display = "none";
+    box.innerHTML = `<div class="state"><div class="big">Nessun volo in partenza in questa finestra.</div>
+      Prova ad allargare la fascia oraria, scegliere un altro giorno o un aeroporto con più traffico.</div>`;
+    return;
+  }
+
+  const priced = state.rows.filter(r => r.price != null).map(r => r.price);
+  const med = median(priced);
+
+  let rows = [...state.rows];
+  if (state.sort === "price") rows.sort((a,b) => (a.price ?? 1e9) - (b.price ?? 1e9));
+  else if (state.sort === "value") rows.sort((a,b) => (a.price ?? 1e9) - (b.price ?? 1e9)); // prezzo = proxy convenienza (tutti diretti)
+  else rows.sort((a,b) => (a.depLocal||"").localeCompare(b.depLocal||""));
+
+  head.style.display = "flex"; legend.style.display = "flex";
+  document.getElementById("rcount").textContent =
+    `${rows.length} destinazioni da ${originLabel(state.origin)}` + (med ? ` · mediana €${Math.round(med)}` : "");
+
+  box.innerHTML = `<div class="board">` + rows.map(r => {
+    const v = verdictFor(r.price, med);
+    const priceHtml = r.price != null
+      ? `€${Math.round(r.price)}`
+      : `<span class="na">prezzo n/d</span>`;
+    return `<div class="board-row fade">
+      <div class="b-time">${r.depTime || "--:--"}</div>
+      <div class="b-mid">
+        <div class="b-route">${state.origin}<span class="arrow">→</span>${r.dest}
+          <span style="font-weight:400;color:#9db4d6;font-size:14px">${r.destName || ""}</span></div>
+        <div class="b-sub">
+          ${r.number ? `<span>${r.number}</span>` : ""}
+          ${r.airline ? `<span>${r.airline}</span>` : ""}
+          <span>diretto</span>
+        </div>
+      </div>
+      <div class="b-right">
+        ${v ? `<span class="verdict ${v.cls}">${v.label}</span>` : ""}
+        <div class="b-price">${priceHtml}</div>
+        <a class="buy" href="${r.buy_url}" target="_blank" rel="noopener nofollow">Cerca su Aviasales →</a>
+      </div>
+    </div>`;
+  }).join("") + `</div>`;
+}
+
+function showLoading() {
+  document.getElementById("rhead").style.display = "none";
+  document.getElementById("legend").style.display = "none";
+  document.getElementById("results").innerHTML = `<div class="state"><div class="spinner"></div>Leggo il tabellone partenze…</div>`;
+}
+function showError(msg) { document.getElementById("results").innerHTML = `<div class="errbox">${msg}</div>`; }
+</script>
+</body>
+</html>
